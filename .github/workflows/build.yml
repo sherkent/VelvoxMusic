@@ -13,6 +13,11 @@ jobs:
   build:
     name: Build Velvox Music (Windows)
     runs-on: windows-latest
+    env:
+      # Use the GitHub Actions cache as vcpkg binary cache to avoid rebuilding
+      # TagLib on every run.
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+      VCPKG_DEFAULT_TRIPLET: x64-windows
 
     steps:
     - name: Checkout repository
@@ -30,18 +35,14 @@ jobs:
         modules: 'qtshadertools'
         cache: true
 
-    - name: Setup vcpkg and install dependencies
-      uses: lukka/run-vcpkg@v11
-      with:
-        # Pin to a recent vcpkg commit. Update this to the latest stable commit
-        # from https://github.com/microsoft/vcpkg when needed.
-        vcpkgGitCommitId: 'f7423e4c619a1f7d1de4d832fc71f38f81168a9f'
-        runVcpkgInstall: true
-      env:
-        VCPKG_DEFAULT_TRIPLET: x64-windows
-
     - name: Install Inno Setup
       run: choco install innosetup --no-progress -y
+      shell: pwsh
+
+    - name: Verify vcpkg
+      run: |
+        Write-Host "VCPKG_ROOT=$env:VCPKG_ROOT"
+        vcpkg --version
       shell: pwsh
 
     - name: Determine version string
@@ -57,7 +58,7 @@ jobs:
           -G "Visual Studio 17 2022" `
           -A x64 `
           -DCMAKE_BUILD_TYPE=Release `
-          -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}\scripts\buildsystems\vcpkg.cmake"
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
       shell: pwsh
 
     - name: Build
