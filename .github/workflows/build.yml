@@ -3,11 +3,11 @@ name: Build and Release Velvox Music
 on:
   push:
     branches: [main, master]
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches: [main, master]
   workflow_dispatch:
-  tags:
-    - 'v*.*.*'
 
 jobs:
   build:
