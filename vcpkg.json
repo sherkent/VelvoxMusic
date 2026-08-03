@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "velvox-music",
+  "version": "0.1.0",
+  "description": "A modern local music player for Windows",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "taglib",
+      "platform": "windows"
+    }
+  ]
+}

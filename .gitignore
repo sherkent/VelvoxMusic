@@ -1,0 +1,58 @@
+# Build directories
+build/
+out/
+cmake-build-*/
+dist/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# CMake user presets
+CMakeUserPresets.json
+
+# Visual Studio
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+
+# Visual Studio Code
+.vscode/
+
+# Qt Creator
+*.user
+*.user.*
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+CMakeLists.txt.user
+
+# Qt generated files
+*.qmlc
+*.jsc
+*.qm
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+*~

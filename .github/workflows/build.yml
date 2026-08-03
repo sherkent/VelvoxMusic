@@ -1,0 +1,112 @@
+name: Build and Release Velvox Music
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+  tags:
+    - 'v*.*.*'
+
+jobs:
+  build:
+    name: Build Velvox Music (Windows)
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.0'
+        arch: 'win64_msvc2022_64'
+        # Qt6::QuickEffects lives in the Quick Effects / Quick3D module stack.
+        # If your Qt version uses a different aqtinstall module name, adjust here.
+        modules: 'qtsvg qtshadertools qtquick3d'
+        cache: true
+        setup-python: false
+
+    - name: Setup vcpkg and install dependencies
+      uses: lukka/run-vcpkg@v11
+      with:
+        # Pin to a recent vcpkg commit. Update this to the latest stable commit
+        # from https://github.com/microsoft/vcpkg when needed.
+        vcpkgGitCommitId: 'f7423e4c619a1f7d1de4d832fc71f38f81168a9f'
+        runVcpkgInstall: true
+      env:
+        VCPKG_DEFAULT_TRIPLET: x64-windows
+
+    - name: Install Inno Setup
+      run: choco install innosetup --no-progress -y
+      shell: pwsh
+
+    - name: Determine version string
+      id: version
+      run: |
+        $version = "${{ github.ref_name }}" -replace '/', '-'
+        "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+      shell: pwsh
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . `
+          -G "Visual Studio 17 2022" `
+          -A x64 `
+          -DCMAKE_BUILD_TYPE=Release `
+          -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}\scripts\buildsystems\vcpkg.cmake"
+      shell: pwsh
+
+    - name: Build
+      run: cmake --build build --config Release --parallel
+      shell: pwsh
+
+    - name: Package portable zip
+      run: |
+        New-Item -ItemType Directory -Force -Path dist | Out-Null
+        $zipName = "dist\VelvoxMusic-${{ steps.version.outputs.version }}-win64-portable.zip"
+        $items = Get-ChildItem -Path build\Release | Where-Object {
+            $_.Name -notmatch '\.(pdb|ilk|exp)$'
+        } | Select-Object -ExpandProperty FullName
+        Compress-Archive -Path $items -DestinationPath $zipName -Force
+      shell: pwsh
+
+    - name: Build installer
+      run: |
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\VelvoxMusic.iss
+      shell: pwsh
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-release-${{ steps.version.outputs.version }}
+        path: |
+          dist/*.zip
+          dist/*.exe
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release-${{ github.ref_name }}
+          path: dist
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.zip
+            dist/*.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

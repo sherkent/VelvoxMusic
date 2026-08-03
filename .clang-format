@@ -1,0 +1,50 @@
+# Clang-Format style for Velvox Music (Qt/C++20)
+# Run with: clang-format -i src/**/*.cpp src/**/*.h
+
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: false
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLambdasOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+PointerAlignment: Left
+ReferenceAlignment: Left
+SortIncludes: true
+IncludeBlocks: Preserve
+SpaceAfterTemplateKeyword: true
+SpaceBeforeParens: ControlStatements
+SpacesInAngles: false
+AlwaysBreakTemplateDeclarations: Yes
+
+# Qt-specific: keep Q_OBJECT/Q_PROPERTY macros tidy
+Macros:
+  - Q_OBJECT
+  - Q_PROPERTY(x)=
+  - Q_INVOKABLE
+  - Q_ENUM(x)
+  - Q_SIGNALS
+  - Q_SLOTS
