@@ -23,13 +23,12 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.8.0'
+        version: '6.8.*'
         arch: 'win64_msvc2022_64'
-        # Qt6::QuickEffects lives in the Quick Effects / Quick3D module stack.
-        # If your Qt version uses a different aqtinstall module name, adjust here.
-        modules: 'qtsvg qtshadertools qtquick3d'
+        # qtsvg is part of the base Qt 6.8 package; only qtshadertools is an
+        # add-on. Qt6::QuickEffects/QtQuick.Effects ships with qtdeclarative.
+        modules: 'qtshadertools'
         cache: true
-        setup-python: false
 
     - name: Setup vcpkg and install dependencies
       uses: lukka/run-vcpkg@v11
