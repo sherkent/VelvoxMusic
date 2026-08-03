@@ -12,7 +12,8 @@ on:
 jobs:
   build:
     name: Build Velvox Music (Windows)
-    runs-on: windows-latest
+    # Pin to windows-2022 to guarantee Visual Studio 2022 is present.
+    runs-on: windows-2022
     env:
       # Use the GitHub Actions cache as vcpkg binary cache to avoid rebuilding
       # TagLib on every run.
@@ -35,14 +36,20 @@ jobs:
         modules: 'qtshadertools'
         cache: true
 
-    - name: Install Inno Setup
-      run: choco install innosetup --no-progress -y
+    - name: Ensure vcpkg is available
+      run: |
+        $vcpkgRoot = "C:\vcpkg"
+        if (-Not (Test-Path "$vcpkgRoot\vcpkg.exe")) {
+          if (Test-Path $vcpkgRoot) { Remove-Item -Recurse -Force $vcpkgRoot }
+          git clone https://github.com/microsoft/vcpkg.git $vcpkgRoot
+          & "$vcpkgRoot\bootstrap-vcpkg.bat"
+        }
+        Write-Host "VCPKG_ROOT=$vcpkgRoot"
+        "VCPKG_ROOT=$vcpkgRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       shell: pwsh
 
-    - name: Verify vcpkg
-      run: |
-        Write-Host "VCPKG_ROOT=$env:VCPKG_ROOT"
-        vcpkg --version
+    - name: Install Inno Setup
+      run: choco install innosetup --no-progress -y
       shell: pwsh
 
     - name: Determine version string
