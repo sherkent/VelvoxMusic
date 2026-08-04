@@ -18,7 +18,7 @@ class AudioEngine;
  * keyboard hook. WM_APPCOMMAND is cleaner and does not require extra DLLs.
  *
  * Taskbar thumbnail toolbar uses the ITaskbarList3 COM interface. The window
- * handle is obtained from the QWindow via QNativeInterface::QWindowsWindow.
+ * handle is obtained from the QWindow via QWindow::winId().
  */
 class WindowsSystemIntegration : public QObject
 {

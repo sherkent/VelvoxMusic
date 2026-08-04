@@ -12,7 +12,6 @@
 #include <shellapi.h>
 #include <shobjidl.h>
 #include <qt_windows.h>
-#include <QNativeInterface/QWindowsWindow>
 #endif
 
 namespace Velvox {
@@ -194,8 +193,8 @@ bool WindowsSystemIntegration::install(QObject *nativeEventTarget, AudioEngine *
     // Defer taskbar button creation until the main window is shown.
     QTimer::singleShot(0, this, [this]() {
         for (QWindow *window : qApp->topLevelWindows()) {
-            if (QNativeInterface::QWindowsWindow *ww = window->nativeInterface<QNativeInterface::QWindowsWindow>()) {
-                d->hwnd = reinterpret_cast<HWND>(ww->handle());
+            if (window->handle()) {
+                d->hwnd = reinterpret_cast<HWND>(window->winId());
                 if (d->hwnd)
                     d->createTaskbarButtons(d->hwnd);
                 break;
