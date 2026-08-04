@@ -162,7 +162,7 @@ This project stands on the shoulders of several excellent open-source libraries:
 | [TagLib](https://github.com/taglib/taglib) | LGPL v2.1 / MPL v1.1 | Metadata parsing |
 | [kissfft](https://github.com/mborgerding/kissfft) | BSD-3-Clause | FFT spectrum analysis |
 
-Because **TagLib is LGPL**, Velvox Music links to it **dynamically**. The
+Because **TagLib is LGPL**, Velvox Music links to it **dynamically**.The
 installer and portable archive include the TagLib shared library
 (`tag.dll` / `taglib.dll`) alongside the executable so users can replace it
 with a modified version. See [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md)

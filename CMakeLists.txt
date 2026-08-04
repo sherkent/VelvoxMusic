@@ -16,6 +16,12 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 6.8 REQUIRED COMPONENTS Quick Qml Sql Svg ShaderTools Widgets Core5Compat)
 
+# Suppress non-fatal Qt CMake policy warnings while keeping compatible behavior.
+# QTP0001: use the new default resource prefix for QML modules.
+# QTP0004: we have .qml files in subdirectories without per-directory qmldir files.
+qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0004 OLD)
+
 qt_standard_project_setup()
 
 # ------------------------------------------------------------------------------
@@ -39,10 +45,9 @@ FetchContent_Declare(
     GIT_TAG 131.1.0
     GIT_SHALLOW TRUE
 )
-set(KISSFFT_TEST OFF CACHE BOOL "" FORCE)
-set(KISSFFT_TOOLS OFF CACHE BOOL "" FORCE)
-set(KISSFFT_INSTALL OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(kissfft)
+# We only need the kissfft source files; avoid building its CMake targets
+# (shared/static libraries, tests, tools) and the old-cmake deprecation warning.
+FetchContent_Populate(kissfft)
 
 # TagLib: LGPL metadata parser. Velvox Music links to TagLib dynamically.
 # You must ship the TagLib shared library (e.g. taglib.dll on Windows) and its
@@ -165,7 +170,7 @@ qt_add_shaders(VelvoxMusic "VelvoxMusicShaders"
     BASE "resources/shaders"
     PREFIX "/"
     FILES
-        meshgradient.frag
+        resources/shaders/meshgradient.frag
 )
 
 set_target_properties(VelvoxMusic PROPERTIES
