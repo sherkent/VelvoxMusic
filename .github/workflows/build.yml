@@ -31,8 +31,8 @@ jobs:
       with:
         version: '6.8.*'
         arch: 'win64_msvc2022_64'
-        # qtsvg is part of the base Qt 6.8 package; only qtshadertools is an
-        # add-on. Qt6::QuickEffects/QtQuick.Effects ships with qtdeclarative.
+        # qtsvg and QtQuick.Effects are part of the base Qt 6.8 package;
+        # only qtshadertools (used by ShaderEffect) is an add-on.
         modules: 'qtshadertools'
         cache: true
 

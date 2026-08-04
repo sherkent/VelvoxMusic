@@ -14,7 +14,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick Qml Sql Svg ShaderTools Effects Widgets)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick Qml Sql Svg ShaderTools Widgets)
 
 qt_standard_project_setup()
 
@@ -196,7 +196,6 @@ target_link_libraries(VelvoxMusic PRIVATE
     Qt6::Qml
     Qt6::Sql
     Qt6::Svg
-    Qt6::QuickEffects
     Qt6::Widgets
     ${TAGLIB_TARGET}
 )
