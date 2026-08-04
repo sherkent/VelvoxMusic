@@ -38,7 +38,13 @@ jobs:
         cache: true
 
     - name: Lint QML
-      run: qmllint qml
+      run: |
+        $qmllint = "$env:QT_ROOT_DIR\bin\qmllint.exe"
+        if (-Not (Test-Path $qmllint)) {
+          Write-Error "qmllint not found at $qmllint"
+          exit 1
+        }
+        & $qmllint qml
       shell: pwsh
 
     - name: Ensure vcpkg is available
