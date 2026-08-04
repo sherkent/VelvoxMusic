@@ -44,7 +44,9 @@ jobs:
           Write-Error "qmllint not found at $qmllint"
           exit 1
         }
-        & $qmllint qml
+        $output = & $qmllint qml 2>&1 | Out-String
+        Write-Host $output
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       shell: pwsh
 
     - name: Ensure vcpkg is available
