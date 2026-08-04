@@ -13,15 +13,16 @@
 
 #ifndef DWMWA_SYSTEMBACKDROP_TYPE
 #define DWMWA_SYSTEMBACKDROP_TYPE 38
-
-enum DWM_SYSTEMBACKDROP_TYPE {
-    DWMSBT_AUTO = 0,
-    DWMSBT_NONE = 1,
-    DWMSBT_MAINWINDOW = 2,
-    DWMSBT_TRANSIENTWINDOW = 3,
-    DWMSBT_TABBEDWINDOW = 4
-};
 #endif
+
+// Provide fallback constants for older SDKs that don't define the backdrop enum.
+namespace {
+constexpr int kDwmsbtAuto = 0;
+constexpr int kDwmsbtNone = 1;
+constexpr int kDwmsbtMainWindow = 2;
+constexpr int kDwmsbtTransientWindow = 3;
+constexpr int kDwmsbtTabbedWindow = 4;
+}
 #endif
 
 namespace Velvox {
@@ -52,16 +53,16 @@ void WindowBackdrop::apply(QWindow *window, BackdropType type)
         qWarning() << "WindowBackdrop: failed to set dark mode:" << hr;
     }
 
-    DWM_SYSTEMBACKDROP_TYPE backdrop = DWMSBT_MAINWINDOW;
+    int backdrop = kDwmsbtMainWindow;
     switch (type) {
     case Acrylic:
-        backdrop = DWMSBT_TABBEDWINDOW;
+        backdrop = kDwmsbtTabbedWindow;
         break;
     case Mica:
-        backdrop = DWMSBT_MAINWINDOW;
+        backdrop = kDwmsbtMainWindow;
         break;
     case MicaAlt:
-        backdrop = DWMSBT_TRANSIENTWINDOW;
+        backdrop = kDwmsbtTransientWindow;
         break;
     }
 
