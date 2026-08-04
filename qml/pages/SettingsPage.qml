@@ -35,9 +35,9 @@ Page {
                 // This single setting controls both the mesh-gradient background
                 // resolution and the acrylic blur sampling quality.
                 model: ListModel {
-                    ListElement { text: "Low (0.5x)"; value: AcrylicPanel.Quality.Low }
-                    ListElement { text: "Medium (0.75x)"; value: AcrylicPanel.Quality.Medium }
-                    ListElement { text: "High (1.0x)"; value: AcrylicPanel.Quality.High }
+                    ListElement { text: "Low (0.5x)"; value: 0 }
+                    ListElement { text: "Medium (0.75x)"; value: 1 }
+                    ListElement { text: "High (1.0x)"; value: 2 }
                 }
                 textRole: "text"
                 valueRole: "value"

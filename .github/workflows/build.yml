@@ -37,6 +37,10 @@ jobs:
         modules: 'qtshadertools qt5compat'
         cache: true
 
+    - name: Lint QML
+      run: qmllint qml
+      shell: pwsh
+
     - name: Ensure vcpkg is available
       run: |
         $vcpkgRoot = "C:\vcpkg"

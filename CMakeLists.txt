@@ -228,6 +228,22 @@ target_include_directories(VelvoxMusic PRIVATE
 )
 
 # ------------------------------------------------------------------------------
+# QML static analysis
+# ------------------------------------------------------------------------------
+find_program(QMLLINT_EXECUTABLE qmllint
+    HINTS "${QT6_INSTALL_PREFIX}/bin" "${Qt6Core_DIR}/../../../bin"
+)
+if(QMLLINT_EXECUTABLE)
+    add_custom_target(qmllint
+        COMMAND ${QMLLINT_EXECUTABLE} qml
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Running qmllint on QML files"
+    )
+else()
+    message(STATUS "qmllint not found; qmllint target disabled")
+endif()
+
+# ------------------------------------------------------------------------------
 # Install
 # ------------------------------------------------------------------------------
 include(GNUInstallDirs)
