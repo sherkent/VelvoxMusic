@@ -3,29 +3,31 @@
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 
+// Vulkan-style GLSL requires all uniforms to be inside a single std140
+// block with binding = 0. Qt Quick passes custom properties as members of
+// this block, matched by name via SPIR-V reflection.
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;
     float qt_Opacity;
+    float u_time;
+    vec2 u_resolution;
+    int u_blobCount;
+    vec4 u_baseColor;
+    vec4 u_color1;
+    vec4 u_color2;
+    vec4 u_color3;
+    vec4 u_color4;
+    vec2 u_pos1;
+    vec2 u_pos2;
+    vec2 u_pos3;
+    vec2 u_pos4;
+    float u_radius1;
+    float u_radius2;
+    float u_radius3;
+    float u_radius4;
+    float u_energy;
+    int u_rhythmEnabled;
 };
-
-uniform float u_time;
-uniform vec2 u_resolution;
-uniform int u_blobCount;
-uniform vec4 u_baseColor;
-uniform vec4 u_color1;
-uniform vec4 u_color2;
-uniform vec4 u_color3;
-uniform vec4 u_color4;
-uniform vec2 u_pos1;
-uniform vec2 u_pos2;
-uniform vec2 u_pos3;
-uniform vec2 u_pos4;
-uniform float u_radius1;
-uniform float u_radius2;
-uniform float u_radius3;
-uniform float u_radius4;
-uniform float u_energy;
-uniform int u_rhythmEnabled;
 
 const float GAMMA = 1.7;
 
