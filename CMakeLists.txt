@@ -14,7 +14,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick Qml Sql Svg ShaderTools Widgets)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick Qml Sql Svg ShaderTools Widgets Core5Compat)
 
 qt_standard_project_setup()
 
@@ -212,6 +212,7 @@ target_link_libraries(VelvoxMusic PRIVATE
     Qt6::Sql
     Qt6::Svg
     Qt6::Widgets
+    Qt6::Core5Compat
     ${TAGLIB_TARGET}
 )
 
@@ -219,7 +220,6 @@ target_include_directories(VelvoxMusic PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${miniaudio_SOURCE_DIR}
     ${kissfft_SOURCE_DIR}
-    ${kissfft_SOURCE_DIR}/tools
 )
 
 # ------------------------------------------------------------------------------

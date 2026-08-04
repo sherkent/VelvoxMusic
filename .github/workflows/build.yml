@@ -31,9 +31,10 @@ jobs:
       with:
         version: '6.8.*'
         arch: 'win64_msvc2022_64'
-        # qtsvg and QtQuick.Effects are part of the base Qt 6.8 package;
-        # only qtshadertools (used by ShaderEffect) is an add-on.
-        modules: 'qtshadertools'
+        # qtsvg and QtQuick.Effects are part of the base Qt 6.8 package.
+        # qtshadertools is used by ShaderEffect; qt5compat provides Core5Compat
+        # (required by QTextCodec).
+        modules: 'qtshadertools qt5compat'
         cache: true
 
     - name: Ensure vcpkg is available

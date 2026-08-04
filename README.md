@@ -41,7 +41,7 @@ A modern, high-performance local music player for **Windows**, built with
 
 | Layer | Technology | Notes |
 |---|---|---|
-| UI Framework | **Qt 6.8+** (`Quick`, `Qml`, `Sql`, `Svg`, `ShaderTools`, `Effects`, `Widgets`) | Frameless window + QML module via `qt_add_qml_module` |
+| UI Framework | **Qt 6.8+** (`Quick`, `Qml`, `Sql`, `Svg`, `ShaderTools`, `Widgets`, `Core5Compat`) | Frameless window + QML module via `qt_add_qml_module` |
 | Language | **C++20** | Core backend and `QAbstractListModel` subclasses |
 | Build System | **CMake 3.21+** | LTO and MSVC whole-program optimization in Release |
 | Audio | **miniaudio** | Single-header decoding/playback, commercial-safe |

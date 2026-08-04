@@ -131,6 +131,6 @@ Item {
         property real u_energy: root.energy
         property int u_rhythmEnabled: root.rhythmEnabled ? 1 : 0
 
-        fragmentShader: "qrc:/meshgradient.qsb"
+        fragmentShader: "qrc:/meshgradient.frag.qsb"
     }
 }
