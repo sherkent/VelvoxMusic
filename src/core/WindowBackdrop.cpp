@@ -23,6 +23,63 @@ constexpr int kDwmsbtMainWindow = 2;
 constexpr int kDwmsbtTransientWindow = 3;
 constexpr int kDwmsbtTabbedWindow = 4;
 }
+
+// ---------------------------------------------------------------------------
+// SetWindowCompositionAttribute — real-time acrylic blur
+// (shows what's actually behind the window, not just the wallpaper)
+// ---------------------------------------------------------------------------
+enum ACCENT_STATE {
+    ACCENT_DISABLED = 0,
+    ACCENT_ENABLE_GRADIENT = 1,
+    ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
+    ACCENT_ENABLE_BLURBEHIND = 3,
+    ACCENT_ENABLE_ACRYLICBLURBEHIND = 4,
+    ACCENT_ENABLE_HOSTBACKDROP = 5,
+    ACCENT_INVALID_STATE = 6
+};
+
+struct ACCENTPOLICY {
+    ACCENT_STATE AccentState;
+    int AccentFlags;
+    int GradientColor;   // ABGR format
+    int AnimationId;
+};
+
+enum WINDOWCOMPOSITIONATTRIB {
+    WCA_ACCENT_POLICY = 19
+};
+
+struct WINCOMPATTRDATA {
+    WINDOWCOMPOSITIONATTRIB Attribute;
+    PVOID Data;
+    ULONG DataSize;
+};
+
+using pSetWindowCompositionAttribute = BOOL (WINAPI *)(HWND, WINCOMPATTRDATA *);
+
+static bool applyBlurBehind(HWND hwnd)
+{
+    HMODULE hUser32 = GetModuleHandleW(L"user32.dll");
+    if (!hUser32)
+        return false;
+
+    auto setCompAttr = reinterpret_cast<pSetWindowCompositionAttribute>(
+        GetProcAddress(hUser32, "SetWindowCompositionAttribute"));
+    if (!setCompAttr)
+        return false;
+
+    ACCENTPOLICY policy = {};
+    policy.AccentState = ACCENT_ENABLE_ACRYLICBLURBEHIND;
+    policy.AccentFlags = 2; // draw all borders
+    policy.GradientColor = 0x99000000; // dark tint, ~60% opacity
+
+    WINCOMPATTRDATA data = {};
+    data.Attribute = WCA_ACCENT_POLICY;
+    data.Data = &policy;
+    data.DataSize = sizeof(policy);
+
+    return setCompAttr(hwnd, &data);
+}
 #endif
 
 namespace Velvox {
@@ -53,6 +110,16 @@ void WindowBackdrop::apply(QWindow *window, BackdropType type)
         qWarning() << "WindowBackdrop: failed to set dark mode:" << hr;
     }
 
+    // BlurBehind uses SetWindowCompositionAttribute for real-time acrylic blur.
+    // Fall back to DWM TabbedWindow acrylic on failure.
+    if (type == BlurBehind) {
+        if (applyBlurBehind(hwnd)) {
+            return;
+        }
+        qWarning() << "WindowBackdrop: BlurBehind failed, falling back to DWM acrylic";
+        type = Acrylic;
+    }
+
     int backdrop = kDwmsbtMainWindow;
     switch (type) {
     case Acrylic:
@@ -63,6 +130,8 @@ void WindowBackdrop::apply(QWindow *window, BackdropType type)
         break;
     case MicaAlt:
         backdrop = kDwmsbtTransientWindow;
+        break;
+    default:
         break;
     }
 

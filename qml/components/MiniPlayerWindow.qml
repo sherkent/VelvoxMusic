@@ -43,11 +43,15 @@ Window {
             audioEngine.play(root.currentTrack.filePath)
     }
 
-    AcrylicPanel {
+    Component.onCompleted: windowBackdrop.apply(root, WindowBackdrop.BlurBehind)
+
+    // Semi-transparent overlay — the window's BlurBehind provides the real
+    // acrylic blur of whatever is behind the window on the desktop.
+    Rectangle {
         anchors.fill: parent
-        blurRadius: 48
-        tintColor: ThemeManager.panelColor
-        tintOpacity: 0.85
+        color: Qt.rgba(ThemeManager.panelColor.r, ThemeManager.panelColor.g,
+                       ThemeManager.panelColor.b, 0.72)
+        radius: ThemeManager.radiusMedium
 
         MouseArea {
             id: dragArea

@@ -179,7 +179,7 @@ Window {
     // ----------------------------------------------------------------------
     // System Acrylic/Mica backdrop
     // ----------------------------------------------------------------------
-    Component.onCompleted: windowBackdrop.apply(rootWindow, WindowBackdrop.Mica)
+    Component.onCompleted: windowBackdrop.apply(rootWindow, WindowBackdrop.BlurBehind)
 
     // ----------------------------------------------------------------------
     // Title bar

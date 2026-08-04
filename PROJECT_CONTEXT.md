@@ -8,7 +8,7 @@
 - **音频**：miniaudio（解码 + 播放，商业安全）
 - **元数据**：TagLib（LGPL，需动态链接）
 - **本地数据库**：QSQLITE
-- **UI 方向**：现代、高颜值、动态网格渐变、高斯模糊玻璃拟态、流畅动画
+- **UI 方向**：现代、高颜值、系统 Acrylic/Mica 原生背景、播放页封面取色动态网格渐变、高斯模糊玻璃拟态、流畅动画
 - **硬件目标**：AMD 核显笔记本 / 16GB 内存，要求内存占用小、渲染可分级
 - **许可证**：MIT
 
@@ -18,7 +18,7 @@
 
 ### 1. 项目骨架
 - CMake 根配置（`CMakeLists.txt`），已加入 Release 构建优化（LTO、去符号、/O2）与 `windeployqt` 自动部署步骤
-- Qt6 模块引入：`Quick`、`Qml`、`Sql`、`Svg`、`ShaderTools`、`Effects`、`Widgets`
+- Qt6 模块引入：`Quick`、`Qml`、`Sql`、`Svg`、`ShaderTools`、`Widgets`、`Core5Compat`
 - 使用 `qt_add_qml_module` 组织 QML 模块（URI: `VelvoxMusic`），未使用手写 `.qrc`
 - `.gitignore`（覆盖 build/、CMakeUserPresets.json、Qt Creator 用户文件等）
 - MIT `LICENSE`，`THIRD_PARTY_LICENSES.md` 补充 LGPL 来源声明
@@ -32,10 +32,12 @@
 - `src/core/SpectrumAnalyzer.h/.cpp` —— 实时频谱分析（kissfft + SPSC ring buffer）；迭代缓冲已提升为成员变量避免循环内堆分配
 - `src/core/Track.h` / `Playlist.h` —— 曲目与播放列表数据结构
 - `src/core/MetadataReader.h/.cpp` —— TagLib 元数据读取 + 封面提取与缓存（限制 400×400 JPEG）
-- `src/core/DatabaseManager.h/.cpp` —— QSQLITE 连接、迁移与 CRUD（tracks / playlists / playlist_tracks / favorites / recent_plays）
+- `src/core/DatabaseManager.h/.cpp` —— QSQLITE 连接、迁移与 CRUD（tracks / playlists / playlist_tracks / favorites / recent_plays / track_cover_colors）
 - `src/core/LibraryManager.h/.cpp` —— 本地曲库目录管理 + 后台线程异步扫描 + 进度报告
 - `src/core/LyricsParser.h/.cpp` —— LRC / 内嵌歌词解析，支持标准 LRC 与增强 LRC 逐字标签 `<mm:ss.xx>`
 - `src/core/WindowsSystemIntegration.h/.cpp` —— Windows 媒体键（WM_APPCOMMAND）+ 任务栏缩略图按钮（ITaskbarList3）+ 系统托盘集成入口
+- `src/core/WindowBackdrop.h/.cpp` —— Windows DWM 系统 Acrylic / Mica / MicaAlt 原生背景设置
+- `src/core/CoverColorExtractor.h/.cpp` —— 封面下采样、HSV 分箱主色提取、后台线程处理、数据库缓存、结果信号回传 QML
 - `src/models/TrackListModel.h/.cpp` —— `QAbstractListModel` 歌曲源模型，仅持有原始曲目数据与基本 CRUD
 - `src/models/TrackListProxyModel.h/.cpp` —— `QSortFilterProxyModel` 代理，承担排序/过滤/索引映射，避免 `beginResetModel` 导致的全列表重建
 - `src/models/AlbumListModel.h/.cpp` —— 专辑聚合模型（封面/年份/曲目数/总时长）与专辑内曲目查询
@@ -44,11 +46,11 @@
 - `src/models/LyricsModel.h/.cpp` —— 歌词数据模型，支持当前行/当前词同步与高亮
 
 ### 3. QML 前端骨架
-- `qml/Main.qml` —— 无边框主窗口（自绘标题栏、可拖动缩放、最小化/最大化/关闭），集成底部播放栏、歌词面板、迷你播放器切换、上一首/下一首队列
+- `qml/Main.qml` —— 无边框主窗口（自绘标题栏、可拖动缩放、最小化/最大化/关闭），系统 Acrylic/Mica 原生背景，集成底部播放栏、歌词面板、迷你播放器切换、上一首/下一首队列、播放详情页入口
 - `qml/theme/ThemeManager.qml` —— QML Singleton 设计 token（色板/圆角/间距/尺寸/渐变占位）
 - `qml/theme/Motion.qml`（Singleton）—— 全局动画 token（fast/normal/slow 时长 + 统一缓动曲线 + reduceMotion 降级）
 - `qml/components/AppButton.qml` —— 可复用按钮
-- `qml/components/MeshGradientBackground.qml` —— 动态网格渐变背景（RHI shader + 律动模式 + Low/Medium/High 性能分级 + 窗口失焦暂停）
+- `qml/components/MeshGradientBackground.qml` —— 动态网格渐变背景（RHI shader + 动态颜色数组输入 + 颜色平滑过渡 + 律动模式 + Low/Medium/High 性能分级 + 窗口失焦/页面离开暂停）
 - `qml/components/AcrylicPanel.qml` —— 基于 `Qt6::QuickEffects` / `MultiEffect` 的毛玻璃面板（可配 blurRadius / tintColor / tintOpacity / renderQuality）
 - `qml/components/CrossFadeImage.qml` —— 切歌时封面交叉淡化；支持 `sourceSize`、`asynchronous` 加载、可关闭动画，列表委托中关闭动画避免滚动卡顿
 - `qml/components/PlayPauseButton.qml` —— 播放/暂停按钮，带图标交叉淡化 + 缩放过渡
@@ -61,6 +63,7 @@
   - `qml/pages/ArtistPage.qml` —— 艺术家网格浏览，点击艺术家显示右侧曲目列表，点击曲目播放
   - `qml/pages/PlaylistsPage.qml` —— 播放列表新建/删除/重命名、歌曲拖拽排序
   - `qml/pages/SearchPage.qml` —— 全局搜索，标题/艺人/专辑模糊匹配 + 150ms 防抖
+  - `qml/pages/NowPlayingPage.qml` —— 播放详情页（大图封面、进度条、播放控制），封面取色动态网格渐变背景，无 AcrylicPanel/毛玻璃
   - `qml/pages/SettingsPage.qml` —— 设置占位（渲染质量切换）
 - `qml/pages/AudioTestPage.qml` —— 音频引擎测试页；频谱可视化已改用 `Canvas` 单帧绘制以避免布局开销
 - `qml/pages/LibraryTestPage.qml` —— 本地曲库完整测试页（保留）
@@ -84,6 +87,8 @@
 | `src/core/` | `Velvox::LibraryManager` | 曲库目录管理与异步扫描 |
 | `src/core/` | `Velvox::DatabaseManager` | QSQLITE 连接、迁移与 CRUD |
 | `src/core/` | `Velvox::WindowsSystemIntegration` | Windows 媒体键、任务栏缩略图按钮、托盘信号中转 |
+| `src/core/` | `Velvox::WindowBackdrop` | Windows DWM 系统 Acrylic / Mica / MicaAlt 背景设置 |
+| `src/core/` | `Velvox::CoverColorExtractor` | 封面下采样、HSV 主色提取、后台线程、数据库缓存 |
 | `src/models/` | `Velvox::TrackListModel` | 歌曲源 `QAbstractListModel`（纯数据 + 收藏/删除） |
 | `src/models/` | `Velvox::TrackListProxyModel` | `QSortFilterProxyModel` 包装，增量过滤/排序/索引映射 |
 | `src/models/` | `Velvox::AlbumListModel` | 专辑聚合 `QAbstractListModel`（封面/年份/曲目数/总时长） |
@@ -118,7 +123,9 @@ VelvoxMusic/
 │   │   ├── DatabaseManager.h/.cpp
 │   │   ├── LibraryManager.h/.cpp
 │   │   ├── LyricsParser.h/.cpp
-│   │   └── WindowsSystemIntegration.h/.cpp
+│   │   ├── WindowsSystemIntegration.h/.cpp
+│   │   ├── WindowBackdrop.h/.cpp    # Windows DWM Acrylic/Mica 背景
+│   │   └── CoverColorExtractor.h/.cpp # 封面取色 + 缓存
 │   └── models/                 # 暴露给 QML 的数据模型
 │       ├── TrackListModel.h/.cpp
 │       ├── TrackListProxyModel.h/.cpp
@@ -127,7 +134,7 @@ VelvoxMusic/
 │       ├── PlaylistModel.h/.cpp
 │       └── LyricsModel.h/.cpp
 ├── qml/
-│   ├── Main.qml                # 无边框主窗口 + 播放栏 + 歌词面板 + 迷你播放器
+│   ├── Main.qml                # 无边框主窗口 + 系统 Acrylic/Mica 背景 + 播放栏 + 歌词面板 + 迷你播放器 + 播放详情页入口
 │   ├── pages/                  # 页面级视图
 │   │   ├── HomePage.qml
 │   │   ├── LibraryPage.qml
@@ -135,6 +142,7 @@ VelvoxMusic/
 │   │   ├── ArtistPage.qml
 │   │   ├── PlaylistsPage.qml
 │   │   ├── SearchPage.qml
+│   │   ├── NowPlayingPage.qml  # 播放详情页（封面取色动态背景）
 │   │   ├── SettingsPage.qml
 │   │   ├── AudioTestPage.qml
 │   │   └── LibraryTestPage.qml
@@ -174,6 +182,8 @@ VelvoxMusic/
 5. **实时线程零堆分配**：`AudioEngine` 预分配单声道样本缓冲；`SpectrumAnalyzer` 将 `samples`/`bands`/`fftOut` 提升为成员变量。
 6. **Release 构建优化**：`CMakeLists.txt` 已加入 MSVC `/O2 /GL /LTCG /OPT:REF /OPT:ICF` 与 GCC/Clang `-O3 -flto -s` 等选项。
 7. **搜索/排序模型增量更新**：`TrackListModel` 拆分为纯源模型，`TrackListProxyModel`（`QSortFilterProxyModel`）接管过滤与排序。搜索时通过 `invalidateFilter()` 触发 `rowsInserted`/`rowsRemoved` 增量更新，排序时触发 `layoutChanged`，避免 `beginResetModel` 导致 ListView 重建全部委托。
+8. **主窗口 GPU 减负**：移除全局网格渐变 shader，改用系统 DWM Acrylic/Mica，主窗口不再持续运行自定义 fragment shader。
+9. **播放页按需渲染**：`MeshGradientBackground.running` 绑定页面可见性与窗口激活状态，离开 `NowPlayingPage` 或窗口最小化/失焦时动画暂停；封面颜色提取结果按 `track_id` 缓存到数据库，避免重复计算。
 
 当前内存目标：**空闲/播放状态 80–130 MB Private Working Set；扫描峰值不超过 250 MB**。
 
@@ -189,6 +199,8 @@ VelvoxMusic/
 - [x] 实现播放队列基础上一首/下一首（`Main.qml` + `WindowsSystemIntegration` 信号）
 - [x] 完善 `TrackListModel` 并接入真实数据
 - [x] Windows 媒体键 + 任务栏缩略图按钮 + 系统托盘集成
+- [x] 系统 Acrylic/Mica 原生背景（`WindowBackdrop`）
+- [x] 播放详情页封面取色动态背景（`CoverColorExtractor` + `NowPlayingPage` + `MeshGradientBackground`）
 
 ### 中优先级
 - [x] 设计并实现现代化无边框窗口拖拽、缩放、标题栏
@@ -225,7 +237,10 @@ VelvoxMusic/
 5. **窗口**：无边框主窗口，自定义标题栏、拖拽、双击最大化、边缘缩放。
 6. **资源嵌入**：图标、字体、shader 通过 `qt_add_qml_module` 的 `RESOURCES` 嵌入。
 7. **第三方库获取**：miniaudio 与 kissfft 均通过 CMake `FetchContent` 自动拉取源码；kissfft 源文件直接编译进目标，避免动态库部署。
-8. **毛玻璃实现**：使用 Qt 6 内置 `Qt6::QuickEffects` 的 `MultiEffect` 实现高斯模糊，不引入已废弃的 `Qt5Compat.GraphicalEffects`；背景层与 AcrylicPanel 均开启 `layer.enabled` 缓存，避免每帧重算模糊。
-9. **动画系统**：所有动画时长与缓动曲线统一从 `Motion.qml` Singleton 读取，支持 `reduceMotion` 一键降级为 0ms，兼顾无障碍与低性能设备。
-10. **实时音频线程**：禁止在回调与频谱工作线程中堆分配，采用预分配/成员缓冲策略，降低延迟抖动。
-11. **图片策略**：封面缓存到本地 400×400 JPEG，不在内存中驻留大图；QML 显示时通过 `sourceSize` 限制解码尺寸，并异步加载。
+8. **毛玻璃实现**：使用 Qt 6 内置 `QtQuick.Effects` 的 `MultiEffect` 实现高斯模糊，不引入已废弃的 `Qt5Compat.GraphicalEffects`；背景层与 AcrylicPanel 均开启 `layer.enabled` 缓存，避免每帧重算模糊。
+9. **主窗口背景**：彻底移除全局网格渐变 shader，改用 Windows DWM 原生 Acrylic / Mica（`WindowBackdrop`），主窗口各面板使用半透明色，不再有不透明背景层遮挡系统材质。
+10. **播放详情页背景**：复用网格渐变 shader，但输入改为 `CoverColorExtractor` 从当前封面提取的动态颜色数组；页面离开或窗口失焦时暂停 shader，避免持续占用 GPU；该页面不使用 AcrylicPanel 或任何毛玻璃，背景本身就是内容。
+11. **封面颜色策略**：封面先下采样到 40×40，在 HSV 空间分箱提取 4 个主色 + 1 个深色基调色，后台线程执行；结果按 `track_id` 存入 `track_cover_colors` 表，同一首歌再次播放时直接走缓存。
+12. **动画系统**：所有动画时长与缓动曲线统一从 `Motion.qml` Singleton 读取，支持 `reduceMotion` 一键降级为 0ms，兼顾无障碍与低性能设备。
+13. **实时音频线程**：禁止在回调与频谱工作线程中堆分配，采用预分配/成员缓冲策略，降低延迟抖动。
+14. **图片策略**：封面缓存到本地 400×400 JPEG，不在内存中驻留大图；QML 显示时通过 `sourceSize` 限制解码尺寸，并异步加载。

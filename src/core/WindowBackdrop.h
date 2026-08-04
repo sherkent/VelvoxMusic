@@ -20,9 +20,11 @@ public:
     explicit WindowBackdrop(QObject *parent = nullptr);
 
     enum BackdropType {
-        Acrylic,   ///< Tabbed-window acrylic (strong blur + tint)
-        Mica,      ///< Main-window mica (subtle desktop-tinted material)
-        MicaAlt    ///< Transient-window mica variant
+        Acrylic,   ///< Tabbed-window acrylic (DWM, strong blur + tint)
+        Mica,      ///< Main-window mica (DWM, subtle desktop-tinted material)
+        MicaAlt,   ///< Transient-window mica variant (DWM)
+        BlurBehind ///< Real-time acrylic blur (SetWindowCompositionAttribute,
+                   ///< shows what's behind the window in real time)
     };
     Q_ENUM(BackdropType)
 
