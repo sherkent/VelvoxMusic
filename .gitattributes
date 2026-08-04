@@ -1,0 +1,4 @@
+# Normalize line endings to LF in the repository, regardless of the local
+# core.autocrlf setting. The project uses Qt/CMake/QML which all handle LF
+# correctly on Windows.
+* text=auto eol=lf
