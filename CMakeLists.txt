@@ -140,7 +140,7 @@ qt_add_qml_module(VelvoxMusic
     URI VelvoxMusic
     VERSION 1.0
     QML_FILES
-        qml/main.qml
+        qml/Main.qml
         qml/pages/HomePage.qml
         qml/pages/AudioTestPage.qml
         qml/pages/LibraryTestPage.qml

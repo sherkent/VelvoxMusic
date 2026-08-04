@@ -44,7 +44,7 @@
 - `src/models/LyricsModel.h/.cpp` —— 歌词数据模型，支持当前行/当前词同步与高亮
 
 ### 3. QML 前端骨架
-- `qml/main.qml` —— 无边框主窗口（自绘标题栏、可拖动缩放、最小化/最大化/关闭），集成底部播放栏、歌词面板、迷你播放器切换、上一首/下一首队列
+- `qml/Main.qml` —— 无边框主窗口（自绘标题栏、可拖动缩放、最小化/最大化/关闭），集成底部播放栏、歌词面板、迷你播放器切换、上一首/下一首队列
 - `qml/theme/ThemeManager.qml` —— QML Singleton 设计 token（色板/圆角/间距/尺寸/渐变占位）
 - `qml/theme/Motion.qml`（Singleton）—— 全局动画 token（fast/normal/slow 时长 + 统一缓动曲线 + reduceMotion 降级）
 - `qml/components/AppButton.qml` —— 可复用按钮
@@ -127,7 +127,7 @@ VelvoxMusic/
 │       ├── PlaylistModel.h/.cpp
 │       └── LyricsModel.h/.cpp
 ├── qml/
-│   ├── main.qml                # 无边框主窗口 + 播放栏 + 歌词面板 + 迷你播放器
+│   ├── Main.qml                # 无边框主窗口 + 播放栏 + 歌词面板 + 迷你播放器
 │   ├── pages/                  # 页面级视图
 │   │   ├── HomePage.qml
 │   │   ├── LibraryPage.qml
@@ -186,7 +186,7 @@ VelvoxMusic/
 - [x] 接入 TagLib：实现元数据读取（`MetadataReader`）
 - [x] 设计并实现 QSQLITE 数据库 schema（`DatabaseManager`）
 - [x] 实现本地曲库扫描器（后台 worker + `LibraryManager`）
-- [x] 实现播放队列基础上一首/下一首（`main.qml` + `WindowsSystemIntegration` 信号）
+- [x] 实现播放队列基础上一首/下一首（`Main.qml` + `WindowsSystemIntegration` 信号）
 - [x] 完善 `TrackListModel` 并接入真实数据
 - [x] Windows 媒体键 + 任务栏缩略图按钮 + 系统托盘集成
 

@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
-    engine.loadFromModule("VelvoxMusic", "main");
+    engine.loadFromModule("VelvoxMusic", "Main");
 
     // System tray icon. Requires QApplication (not QGuiApplication).
     QSystemTrayIcon trayIcon;

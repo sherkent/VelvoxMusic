@@ -121,7 +121,7 @@ VelvoxMusic/
 │   ├── core/                   # Audio engine, scanner, metadata, database
 │   └── models/                 # QAbstractListModel subclasses for QML
 ├── qml/
-│   ├── main.qml                # Frameless main window
+│   ├── Main.qml                # Frameless main window
 │   ├── pages/                  # Library, Album, Artist, Playlists, Search, Settings
 │   ├── components/             # Reusable controls
 │   └── theme/                  # Singleton theme / motion tokens
