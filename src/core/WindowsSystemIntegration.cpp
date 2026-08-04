@@ -26,7 +26,7 @@ public:
     ITaskbarList3 *taskbarList = nullptr;
     HWND hwnd = nullptr;
     bool buttonsCreated = false;
-    QVector<HBITMAP> bitmaps;
+    QVector<HICON> icons;
 
     explicit Impl(WindowsSystemIntegration *parent)
         : q(parent)
@@ -39,11 +39,11 @@ public:
             taskbarList->Release();
             taskbarList = nullptr;
         }
-        for (HBITMAP bmp : std::as_const(bitmaps)) {
-            if (bmp)
-                DeleteObject(bmp);
+        for (HICON icon : std::as_const(icons)) {
+            if (icon)
+                DestroyIcon(icon);
         }
-        bitmaps.clear();
+        icons.clear();
     }
 
     bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override
@@ -102,26 +102,26 @@ public:
 
         taskbarList->HrInit();
 
-        // Build simple bitmaps for each button. In production use themed icons.
-        HBITMAP hPrev = createSolidBitmap(24, 24, RGB(200, 200, 200));
-        HBITMAP hPlay = createSolidBitmap(24, 24, RGB(0, 200, 0));
-        HBITMAP hNext = createSolidBitmap(24, 24, RGB(200, 200, 200));
-        bitmaps << hPrev << hPlay << hNext;
+        // Build simple icons for each button. In production use themed icons.
+        HICON hPrev = createSolidIcon(24, 24, RGB(200, 200, 200));
+        HICON hPlay = createSolidIcon(24, 24, RGB(0, 200, 0));
+        HICON hNext = createSolidIcon(24, 24, RGB(200, 200, 200));
+        icons << hPrev << hPlay << hNext;
 
         THUMBBUTTON buttons[3] = {};
-        buttons[0].dwMask = THB_BITMAP | THB_TOOLTIP;
+        buttons[0].dwMask = THB_ICON | THB_TOOLTIP;
         buttons[0].iId = 100;
-        buttons[0].hBitmap = hPrev;
+        buttons[0].hIcon = hPrev;
         wcscpy_s(buttons[0].szTip, L"Previous");
 
-        buttons[1].dwMask = THB_BITMAP | THB_TOOLTIP;
+        buttons[1].dwMask = THB_ICON | THB_TOOLTIP;
         buttons[1].iId = 101;
-        buttons[1].hBitmap = hPlay;
+        buttons[1].hIcon = hPlay;
         wcscpy_s(buttons[1].szTip, L"Play/Pause");
 
-        buttons[2].dwMask = THB_BITMAP | THB_TOOLTIP;
+        buttons[2].dwMask = THB_ICON | THB_TOOLTIP;
         buttons[2].iId = 102;
-        buttons[2].hBitmap = hNext;
+        buttons[2].hIcon = hNext;
         wcscpy_s(buttons[2].szTip, L"Next");
 
         hr = taskbarList->ThumbBarAddButtons(window, 3, buttons);
@@ -132,10 +132,11 @@ public:
         }
     }
 
-    HBITMAP createSolidBitmap(int w, int h, COLORREF color)
+    HICON createSolidIcon(int w, int h, COLORREF color)
     {
         HDC hdc = GetDC(nullptr);
         HDC memDC = CreateCompatibleDC(hdc);
+
         BITMAPINFO bmi = {};
         bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmi.bmiHeader.biWidth = w;
@@ -143,16 +144,36 @@ public:
         bmi.bmiHeader.biPlanes = 1;
         bmi.bmiHeader.biBitCount = 32;
         bmi.bmiHeader.biCompression = BI_RGB;
-        void *bits = nullptr;
-        HBITMAP hBmp = CreateDIBSection(memDC, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
-        if (bits) {
-            DWORD *pixels = static_cast<DWORD *>(bits);
+
+        void *colorBits = nullptr;
+        HBITMAP hColor = CreateDIBSection(memDC, &bmi, DIB_RGB_COLORS, &colorBits, nullptr, 0);
+        if (colorBits) {
+            DWORD *pixels = static_cast<DWORD *>(colorBits);
+            const DWORD c = (0xFF000000) | color;
             for (int i = 0; i < w * h; ++i)
-                pixels[i] = (0xFF000000) | color;
+                pixels[i] = c;
         }
+
+        void *maskBits = nullptr;
+        HBITMAP hMask = CreateDIBSection(memDC, &bmi, DIB_RGB_COLORS, &maskBits, nullptr, 0);
+        if (maskBits) {
+            DWORD *pixels = static_cast<DWORD *>(maskBits);
+            for (int i = 0; i < w * h; ++i)
+                pixels[i] = 0xFFFFFFFF; // white = fully opaque
+        }
+
+        ICONINFO ii = {};
+        ii.fIcon = TRUE;
+        ii.hbmMask = hMask;
+        ii.hbmColor = hColor;
+        HICON hIcon = CreateIconIndirect(&ii);
+
+        DeleteObject(hColor);
+        DeleteObject(hMask);
         DeleteDC(memDC);
         ReleaseDC(nullptr, hdc);
-        return hBmp;
+
+        return hIcon;
     }
 };
 #else
