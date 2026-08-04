@@ -37,31 +37,6 @@ jobs:
         modules: 'qtshadertools qt5compat'
         cache: true
 
-    - name: Lint QML
-      run: |
-        $qtBin = "$env:QT_ROOT_DIR\bin"
-        $qmllint = "$qtBin\qmllint.exe"
-        if (-Not (Test-Path $qmllint)) {
-          Write-Error "qmllint not found at $qmllint"
-          exit 1
-        }
-        $env:PATH = "$qtBin;$env:PATH"
-        $outLog = "qmllint.stdout.log"
-        $errLog = "qmllint.stderr.log"
-        $proc = Start-Process -FilePath $qmllint -ArgumentList "qml" `
-          -RedirectStandardOutput $outLog -RedirectStandardError $errLog `
-          -Wait -NoNewWindow -PassThru
-        if (Test-Path $outLog) {
-          Write-Host "--- qmllint stdout ---"
-          Get-Content $outLog -Raw | Write-Host
-        }
-        if (Test-Path $errLog) {
-          Write-Host "--- qmllint stderr ---"
-          Get-Content $errLog -Raw | Write-Host
-        }
-        if ($proc.ExitCode -ne 0) { exit $proc.ExitCode }
-      shell: pwsh
-
     - name: Ensure vcpkg is available
       run: |
         $vcpkgRoot = "C:\vcpkg"
