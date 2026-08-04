@@ -4,6 +4,7 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 
+#include <QDebug>
 #include <QTimer>
 #include <QtGlobal>
 

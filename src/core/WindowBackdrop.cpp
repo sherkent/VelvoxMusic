@@ -13,7 +13,6 @@
 
 #ifndef DWMWA_SYSTEMBACKDROP_TYPE
 #define DWMWA_SYSTEMBACKDROP_TYPE 38
-#endif
 
 enum DWM_SYSTEMBACKDROP_TYPE {
     DWMSBT_AUTO = 0,
@@ -22,6 +21,7 @@ enum DWM_SYSTEMBACKDROP_TYPE {
     DWMSBT_TRANSIENTWINDOW = 3,
     DWMSBT_TABBEDWINDOW = 4
 };
+#endif
 #endif
 
 namespace Velvox {
