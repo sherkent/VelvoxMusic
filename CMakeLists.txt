@@ -47,10 +47,25 @@ FetchContent_MakeAvailable(kissfft)
 # TagLib: LGPL metadata parser. Velvox Music links to TagLib dynamically.
 # You must ship the TagLib shared library (e.g. taglib.dll on Windows) and its
 # license text alongside the application. See README.md for details.
-find_package(taglib CONFIG QUIET)
-if (taglib_FOUND)
-    set(TAGLIB_TARGET taglib::taglib)
-else()
+#
+# vcpkg and distro packages use different config/target names, so probe both.
+set(TAGLIB_TARGET "")
+foreach(_pkg_name TagLib taglib)
+    find_package(${_pkg_name} CONFIG QUIET)
+    if (${_pkg_name}_FOUND)
+        foreach(_tgt_name TagLib::TagLib taglib::taglib)
+            if (TARGET ${_tgt_name})
+                set(TAGLIB_TARGET ${_tgt_name})
+                break()
+            endif()
+        endforeach()
+    endif()
+    if (TAGLIB_TARGET)
+        break()
+    endif()
+endforeach()
+
+if (NOT TAGLIB_TARGET)
     find_package(TagLib REQUIRED)
     if (TARGET TagLib::TagLib)
         set(TAGLIB_TARGET TagLib::TagLib)
@@ -106,7 +121,7 @@ qt_add_executable(VelvoxMusic
     ${CORE_SOURCES}
     ${MODEL_SOURCES}
     ${kissfft_SOURCE_DIR}/kiss_fft.c
-    ${kissfft_SOURCE_DIR}/tools/kiss_fftr.c
+    ${kissfft_SOURCE_DIR}/kiss_fftr.c
 )
 
 # Mark singleton QML types
