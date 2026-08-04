@@ -54,14 +54,6 @@ Item {
         blurMax: root.blurRadius * root._qualityScale
         blurMultiplier: root._blurMultiplier
         autoPaddingEnabled: true
-
-        sourceRect: root.source
-            ? Qt.rect(
-                root.mapToItem(root.source, 0, 0).x,
-                root.mapToItem(root.source, 0, 0).y,
-                root.width,
-                root.height)
-            : Qt.rect(0, 0, 0, 0)
     }
 
     Rectangle {
