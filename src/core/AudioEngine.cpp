@@ -313,7 +313,7 @@ void AudioEngine::setSpectrumEnabled(bool enabled)
 
 void AudioEngine::setPositionUpdateInterval(int ms)
 {
-    ms = std::max(50, ms);
+    ms = (std::max)(50, ms);
     if (d->positionIntervalMs == ms)
         return;
 

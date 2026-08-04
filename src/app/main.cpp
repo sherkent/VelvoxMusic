@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QStandardPaths>
 #include <QDir>
+#include <QWindow>
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <qqml.h>

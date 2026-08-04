@@ -12,7 +12,7 @@
 #include <shellapi.h>
 #include <shobjidl.h>
 #include <qt_windows.h>
-#include <QNativeInterface>
+#include <QNativeInterface/QWindowsWindow>
 #endif
 
 namespace Velvox {

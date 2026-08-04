@@ -30,10 +30,34 @@ namespace {
 
 QString toQString(const TagLib::String &str)
 {
-    if (str.isNull())
+    if (str.isEmpty())
         return QString();
     // to8Bit(true) preserves UTF-8 encoding instead of falling back to Latin-1.
     return QString::fromUtf8(str.to8Bit(true).c_str());
+}
+
+// Convert an ID3v2 SYLT frame to plain LRC text. TagLib 2.x exposes the
+// entries as a SynchedTextList instead of a single text() string.
+QString syncedLyricsToLrc(const TagLib::ID3v2::SynchronizedLyricsFrame *frame)
+{
+    if (!frame)
+        return QString();
+
+    QString lrc;
+    const auto entries = frame->synchedText();
+    for (const auto &entry : entries) {
+        const qint64 ms = static_cast<qint64>(entry.time);
+        const int minutes = static_cast<int>(ms / 60000);
+        const int seconds = static_cast<int>((ms % 60000) / 1000);
+        const int hundredths = static_cast<int>((ms % 1000) / 10);
+        const QString timeStamp =
+            QString("%1:%2.%3")
+                .arg(minutes, 2, 10, QLatin1Char('0'))
+                .arg(seconds, 2, 10, QLatin1Char('0'))
+                .arg(hundredths, 2, 10, QLatin1Char('0'));
+        lrc += QString("[%1]%2\n").arg(timeStamp, toQString(entry.text));
+    }
+    return lrc;
 }
 
 } // anonymous namespace
@@ -150,7 +174,7 @@ QByteArray MetadataReader::extractCoverData(const QString &filePath)
     {
         TagLib::MP4::File file(path.c_str());
         if (file.isValid() && file.tag()) {
-            auto &items = file.tag()->itemListMap();
+            auto items = file.tag()->itemMap();
             auto it = items.find("covr");
             if (it != items.end()) {
                 TagLib::MP4::CoverArtList covers = it->second.toCoverArtList();
@@ -207,8 +231,10 @@ QByteArray MetadataReader::extractLyrics(const QString &filePath)
                 auto sylt = map.find("SYLT");
                 if (sylt != map.end() && !sylt->second.isEmpty()) {
                     auto *frame = dynamic_cast<TagLib::ID3v2::SynchronizedLyricsFrame *>(sylt->second.front());
-                    if (frame)
-                        data = QByteArray(frame->text().to8Bit(true).data(), static_cast<int>(frame->text().to8Bit(true).size()));
+                    if (frame) {
+                        const QString lrc = syncedLyricsToLrc(frame);
+                        data = lrc.toUtf8();
+                    }
                 }
             }
         }
@@ -234,7 +260,7 @@ QByteArray MetadataReader::extractLyrics(const QString &filePath)
     {
         TagLib::MP4::File file(path.c_str());
         if (file.isValid() && file.tag()) {
-            auto &items = file.tag()->itemListMap();
+            auto items = file.tag()->itemMap();
             auto it = items.find("\xC2\xA9lyr"); // "©lyr"
             if (it != items.end()) {
                 auto s = it->second.toStringList().toString();

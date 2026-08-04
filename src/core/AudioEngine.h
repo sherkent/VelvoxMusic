@@ -10,7 +10,6 @@ namespace Velvox {
 class AudioEngine : public QObject
 {
     Q_OBJECT
-    Q_ENUM(PlaybackState)
 
 public:
     enum class PlaybackState {
@@ -18,6 +17,7 @@ public:
         Playing,
         Paused
     };
+    Q_ENUM(PlaybackState)
 
     explicit AudioEngine(QObject *parent = nullptr);
     ~AudioEngine() override;
