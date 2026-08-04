@@ -44,9 +44,20 @@ jobs:
           Write-Error "qmllint not found at $qmllint"
           exit 1
         }
-        $output = & $qmllint qml 2>&1 | Out-String
-        Write-Host $output
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        $outLog = "qmllint.stdout.log"
+        $errLog = "qmllint.stderr.log"
+        $proc = Start-Process -FilePath $qmllint -ArgumentList "qml" `
+          -RedirectStandardOutput $outLog -RedirectStandardError $errLog `
+          -Wait -NoNewWindow -PassThru
+        if (Test-Path $outLog) {
+          Write-Host "--- qmllint stdout ---"
+          Get-Content $outLog -Raw | Write-Host
+        }
+        if (Test-Path $errLog) {
+          Write-Host "--- qmllint stderr ---"
+          Get-Content $errLog -Raw | Write-Host
+        }
+        if ($proc.ExitCode -ne 0) { exit $proc.ExitCode }
       shell: pwsh
 
     - name: Ensure vcpkg is available
