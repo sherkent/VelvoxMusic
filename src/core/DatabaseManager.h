@@ -3,6 +3,7 @@
 #include "core/Playlist.h"
 #include "core/Track.h"
 
+#include <QColor>
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -57,6 +58,10 @@ public:
     // Recent plays
     bool addRecentPlay(int trackId);
     QList<Track> getRecentPlays(int limit = 50);
+
+    // Cover color cache (used by Now Playing dynamic background)
+    QList<QColor> getCoverColors(int trackId);
+    bool setCoverColors(int trackId, const QList<QColor> &colors);
 
     // Albums / Artists
     QList<Album> getAllAlbums();

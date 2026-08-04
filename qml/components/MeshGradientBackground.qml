@@ -14,6 +14,9 @@ import VelvoxMusic
  *
  * Optional "rhythm mode" listens to audioEngine.spectrumChanged and gently
  * modulates blob size/brightness with a smoothed energy value.
+ *
+ * When a non-empty @p colors array is supplied it overrides the default theme
+ * palette; each color change is smoothly interpolated over ~800 ms.
  */
 Item {
     id: root
@@ -23,6 +26,10 @@ Item {
     property int renderQuality: MeshGradientBackground.Low
     property bool rhythmEnabled: false
     property real energy: 0.0
+
+    // Dynamic palette. Expected to contain 1-4 colors; missing entries fall
+    // back to the default theme palette. Colors are smoothly interpolated.
+    property var colors: []
 
     readonly property bool windowActive: Window.window
             ? (Window.window.active && Window.window.visibility !== Window.Minimized)
@@ -76,6 +83,38 @@ Item {
     readonly property real p4y: 0.75 + 0.12 * Math.cos(time * 0.40 + 2.5)
 
     // -------------------------------------------------------------------------
+    // Dynamic palette with smooth interpolation
+    // -------------------------------------------------------------------------
+    property color _baseColor: ThemeManager.gradientBaseColor
+    property color _color1: ThemeManager.gradientColor1
+    property color _color2: ThemeManager.gradientColor2
+    property color _color3: ThemeManager.gradientColor3
+    property color _color4: ThemeManager.gradientColor4
+
+    function _colorAt(index, fallback) {
+        return (root.colors && root.colors.length > index && root.colors[index] !== undefined)
+                ? root.colors[index]
+                : fallback
+    }
+
+    function _updatePalette() {
+        _baseColor = _colorAt(0, ThemeManager.gradientBaseColor)
+        _color1    = _colorAt(1, ThemeManager.gradientColor1)
+        _color2    = _colorAt(2, ThemeManager.gradientColor2)
+        _color3    = _colorAt(3, ThemeManager.gradientColor3)
+        _color4    = _colorAt(4, ThemeManager.gradientColor4)
+    }
+
+    onColorsChanged: _updatePalette()
+    Component.onCompleted: _updatePalette()
+
+    Behavior on _baseColor { ColorAnimation { duration: Motion.reduceMotion ? 0 : 800; easing: Motion.easeOutCubic } }
+    Behavior on _color1    { ColorAnimation { duration: Motion.reduceMotion ? 0 : 800; easing: Motion.easeOutCubic } }
+    Behavior on _color2    { ColorAnimation { duration: Motion.reduceMotion ? 0 : 800; easing: Motion.easeOutCubic } }
+    Behavior on _color3    { ColorAnimation { duration: Motion.reduceMotion ? 0 : 800; easing: Motion.easeOutCubic } }
+    Behavior on _color4    { ColorAnimation { duration: Motion.reduceMotion ? 0 : 800; easing: Motion.easeOutCubic } }
+
+    // -------------------------------------------------------------------------
     // Spectrum energy smoothing
     // -------------------------------------------------------------------------
     property real _targetEnergy: 0.0
@@ -115,11 +154,11 @@ Item {
         property real u_time: root.time
         property size u_resolution: Qt.size(root.width, root.height)
         property int u_blobCount: root._blobCount
-        property color u_baseColor: ThemeManager.gradientBaseColor
-        property color u_color1: ThemeManager.gradientColor1
-        property color u_color2: ThemeManager.gradientColor2
-        property color u_color3: ThemeManager.gradientColor3
-        property color u_color4: ThemeManager.gradientColor4
+        property color u_baseColor: root._baseColor
+        property color u_color1: root._color1
+        property color u_color2: root._color2
+        property color u_color3: root._color3
+        property color u_color4: root._color4
         property point u_pos1: Qt.point(root.p1x, root.p1y)
         property point u_pos2: Qt.point(root.p2x, root.p2y)
         property point u_pos3: Qt.point(root.p3x, root.p3y)

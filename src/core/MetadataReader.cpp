@@ -20,9 +20,12 @@
 #include <taglib/synchronizedlyricsframe.h>
 
 #include <QCryptographicHash>
+#include <QDebug>
 #include <QDir>
 #include <QFileInfo>
 #include <QImage>
+
+#include <string>
 
 namespace Velvox {
 
@@ -86,23 +89,34 @@ Track MetadataReader::readTrack(const QString &filePath) const
     QFileInfo fi(filePath);
     track.fileMtime = fi.lastModified().toMSecsSinceEpoch();
 
-    // Fallback title from filename if tags are empty.
-    track.title = fi.completeBaseName();
-
+#ifdef Q_OS_WIN
+    TagLib::FileRef ref(filePath.toStdWString().c_str());
+#else
     TagLib::FileRef ref(filePath.toUtf8().constData());
-    if (ref.isNull())
+#endif
+    if (ref.isNull()) {
+        qWarning() << "MetadataReader: failed to open file (TagLib::FileRef is null):" << filePath;
+        track.title = fi.completeBaseName();
         return track;
+    }
 
     if (ref.tag()) {
         TagLib::Tag *tag = ref.tag();
         QString t = toQString(tag->title());
-        if (!t.isEmpty())
+        if (!t.isEmpty()) {
             track.title = t;
+        } else {
+            qWarning() << "MetadataReader: title tag is empty for" << filePath;
+            track.title = fi.completeBaseName();
+        }
         track.artist = toQString(tag->artist());
         track.album = toQString(tag->album());
         track.genre = toQString(tag->genre());
         track.year = static_cast<int>(tag->year());
         track.trackNumber = static_cast<int>(tag->track());
+    } else {
+        qWarning() << "MetadataReader: no tag found for" << filePath;
+        track.title = fi.completeBaseName();
     }
 
     if (ref.audioProperties()) {
@@ -122,7 +136,11 @@ Track MetadataReader::readTrack(const QString &filePath) const
 QByteArray MetadataReader::extractCoverData(const QString &filePath)
 {
     QByteArray data;
+#ifdef Q_OS_WIN
+    const std::wstring path = filePath.toStdWString();
+#else
     const std::string path = filePath.toUtf8().constData();
+#endif
 
     // 1. MP3 / ID3v2 attached picture
     {
@@ -214,7 +232,11 @@ QByteArray MetadataReader::extractCoverData(const QString &filePath)
 QByteArray MetadataReader::extractLyrics(const QString &filePath)
 {
     QByteArray data;
+#ifdef Q_OS_WIN
+    const std::wstring path = filePath.toStdWString();
+#else
     const std::string path = filePath.toUtf8().constData();
+#endif
 
     // 1. MP3 / ID3v2 unsynchronized lyrics (USLT) or synchronized lyrics (SYLT).
     {

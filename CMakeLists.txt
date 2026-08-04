@@ -101,6 +101,10 @@ set(CORE_SOURCES
     src/core/LyricsParser.cpp
     src/core/WindowsSystemIntegration.h
     src/core/WindowsSystemIntegration.cpp
+    src/core/WindowBackdrop.h
+    src/core/WindowBackdrop.cpp
+    src/core/CoverColorExtractor.h
+    src/core/CoverColorExtractor.cpp
 )
 
 set(MODEL_SOURCES
@@ -150,6 +154,7 @@ qt_add_qml_module(VelvoxMusic
         qml/pages/PlaylistsPage.qml
         qml/pages/SearchPage.qml
         qml/pages/SettingsPage.qml
+        qml/pages/NowPlayingPage.qml
         qml/components/AppButton.qml
         qml/components/MeshGradientBackground.qml
         qml/components/AcrylicPanel.qml
@@ -197,6 +202,8 @@ if(MSVC)
         $<$<CONFIG:Release>:/LTCG /OPT:REF /OPT:ICF>
         $<$<CONFIG:MinSizeRel>:/LTCG /OPT:REF /OPT:ICF>
     )
+    # DWM API for system Acrylic/Mica backdrop.
+    target_link_libraries(VelvoxMusic PRIVATE dwmapi)
 else()
     # Let CMake's IPO property add -flto automatically; here we just add
     # optimization and symbol stripping. MinGW users will see the binary size

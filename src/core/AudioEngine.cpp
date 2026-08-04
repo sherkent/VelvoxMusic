@@ -168,7 +168,12 @@ void AudioEngine::play(const QString &filePath)
     d->finishedFlag = false;
 
     ma_decoder_config decoderConfig = ma_decoder_config_init(ma_format_f32, 0, 0);
+#ifdef Q_OS_WIN
+    if (ma_decoder_init_file_w(reinterpret_cast<const wchar_t*>(filePath.utf16()), &decoderConfig, &d->decoder) != MA_SUCCESS) {
+#else
     if (ma_decoder_init_file(filePath.toUtf8().constData(), &decoderConfig, &d->decoder) != MA_SUCCESS) {
+#endif
+        qWarning() << "AudioEngine: failed to initialize decoder for" << filePath;
         emit error(tr("Failed to decode file: %1").arg(filePath));
         return;
     }

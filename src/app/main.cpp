@@ -9,10 +9,12 @@
 #include <qqml.h>
 
 #include "core/AudioEngine.h"
+#include "core/CoverColorExtractor.h"
 #include "core/DatabaseManager.h"
 #include "core/LibraryManager.h"
 #include "core/MetadataReader.h"
 #include "core/LyricsParser.h"
+#include "core/WindowBackdrop.h"
 #include "core/WindowsSystemIntegration.h"
 #include "models/TrackListModel.h"
 #include "models/TrackListProxyModel.h"
@@ -55,6 +57,8 @@ int main(int argc, char *argv[])
     Velvox::PlaylistModel playlistModel(&dbManager);
     Velvox::LyricsModel lyricsModel;
     Velvox::WindowsSystemIntegration windowsIntegration;
+    Velvox::WindowBackdrop windowBackdrop;
+    Velvox::CoverColorExtractor coverColorExtractor(&dbManager);
 
     // Connect scan completion to model reload so the QML list stays current.
     QObject::connect(&libraryManager, &Velvox::LibraryManager::scanFinished,
@@ -102,6 +106,12 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<Velvox::WindowsSystemIntegration>(
         "VelvoxMusic", 1, 0, "WindowsSystemIntegration",
         "WindowsSystemIntegration is created from C++ and exposed as the windowsIntegration context property");
+    qmlRegisterUncreatableType<Velvox::WindowBackdrop>(
+        "VelvoxMusic", 1, 0, "WindowBackdrop",
+        "WindowBackdrop is created from C++ and exposed as the windowBackdrop context property");
+    qmlRegisterUncreatableType<Velvox::CoverColorExtractor>(
+        "VelvoxMusic", 1, 0, "CoverColorExtractor",
+        "CoverColorExtractor is created from C++ and exposed as the coverColorExtractor context property");
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("audioEngine", &audioEngine);
@@ -112,6 +122,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("playlistModel", &playlistModel);
     engine.rootContext()->setContextProperty("lyricsModel", &lyricsModel);
     engine.rootContext()->setContextProperty("windowsIntegration", &windowsIntegration);
+    engine.rootContext()->setContextProperty("windowBackdrop", &windowBackdrop);
+    engine.rootContext()->setContextProperty("coverColorExtractor", &coverColorExtractor);
 
     QObject::connect(
         &engine,

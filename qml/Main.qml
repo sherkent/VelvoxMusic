@@ -15,17 +15,17 @@ Window {
     minimumHeight: 600
 
     flags: Qt.Window | Qt.FramelessWindowHint
-    color: ThemeManager.backgroundColor
+    color: "transparent"
     title: qsTr("Velvox Music")
 
     property int currentPageIndex: 0
-    property int backgroundQuality: MeshGradientBackground.Low
     property bool miniPlayerMode: false
     property bool reduceMotion: false
     property bool lyricsVisible: false
     property int currentTrackSourceRow: -1
     property string currentTrackSource: "library"
     property var currentTrack: ({
+        id: -1,
         title: "",
         artist: "",
         coverPath: "",
@@ -52,6 +52,7 @@ Window {
         let filePath = trackListModel.data(idx, TrackListModel.FilePathRole)
 
         rootWindow.currentTrack = {
+            id: trackListModel.data(idx, TrackListModel.IdRole) || -1,
             title: trackListModel.data(idx, TrackListModel.TitleRole) || qsTr("Unknown title"),
             artist: trackListModel.data(idx, TrackListModel.ArtistRole) || qsTr("Unknown artist"),
             coverPath: trackListModel.data(idx, TrackListModel.CoverPathRole) || "",
@@ -74,6 +75,7 @@ Window {
         let durationMs = playlistModel.data(idx, PlaylistModel.DurationMsRole) || 0
 
         rootWindow.currentTrack = {
+            id: playlistModel.data(idx, PlaylistModel.IdRole) || -1,
             title: title,
             artist: artist,
             coverPath: coverPath,
@@ -93,6 +95,7 @@ Window {
             return
 
         rootWindow.currentTrack = {
+            id: data.trackId || -1,
             title: data.title || qsTr("Unknown title"),
             artist: data.artist || qsTr("Unknown artist"),
             coverPath: data.coverPath || "",
@@ -171,15 +174,12 @@ Window {
     Component { id: playlistsPageComponent; PlaylistsPage {} }
     Component { id: searchPageComponent; SearchPage {} }
     Component { id: settingsPageComponent; SettingsPage {} }
+    Component { id: nowPlayingPageComponent; NowPlayingPage {} }
 
-    MeshGradientBackground {
-        id: meshBackground
-        anchors.fill: parent
-        renderQuality: rootWindow.backgroundQuality
-        rhythmEnabled: audioEngine.playbackState === AudioEngine.Playing
-        layer.enabled: true
-        z: -1
-    }
+    // ----------------------------------------------------------------------
+    // System Acrylic/Mica backdrop
+    // ----------------------------------------------------------------------
+    Component.onCompleted: windowBackdrop.apply(rootWindow, WindowBackdrop.Mica)
 
     // ----------------------------------------------------------------------
     // Title bar
@@ -190,7 +190,7 @@ Window {
         anchors.left: parent.left
         anchors.right: parent.right
         height: ThemeManager.titleBarHeight
-        color: ThemeManager.titleBarColor
+        color: Qt.rgba(ThemeManager.titleBarColor.r, ThemeManager.titleBarColor.g, ThemeManager.titleBarColor.b, 0.70)
         z: 10
 
         MouseArea {
@@ -285,16 +285,13 @@ Window {
     // ----------------------------------------------------------------------
     // Bottom player bar
     // ----------------------------------------------------------------------
-    AcrylicPanel {
+    Rectangle {
         id: playerBar
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: ThemeManager.playerBarHeight
-        source: meshBackground
-        blurRadius: 48
-        tintOpacity: 0.70
-        renderQuality: rootWindow.backgroundQuality
+        color: Qt.rgba(ThemeManager.panelColor.r, ThemeManager.panelColor.g, ThemeManager.panelColor.b, 0.72)
         z: 10
 
         RowLayout {
@@ -331,6 +328,12 @@ Window {
                         color: ThemeManager.secondaryTextColor
                         font.pixelSize: 24
                         visible: rootWindow.currentTrack.coverPath.length === 0
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: stackView.push(nowPlayingPageComponent)
                     }
                 }
 
@@ -501,14 +504,11 @@ Window {
         z: 0
 
         // Left navigation
-        AcrylicPanel {
+        Rectangle {
             id: sidePanel
             Layout.preferredWidth: ThemeManager.navWidth
             Layout.fillHeight: true
-            source: meshBackground
-            blurRadius: 64
-            tintOpacity: 0.68
-            renderQuality: rootWindow.backgroundQuality
+            color: Qt.rgba(ThemeManager.panelColor.r, ThemeManager.panelColor.g, ThemeManager.panelColor.b, 0.68)
 
             ColumnLayout {
                 anchors.fill: parent
@@ -517,12 +517,13 @@ Window {
 
                 Repeater {
                     model: [
-                        { name: qsTr("Library"), component: libraryPageComponent },
-                        { name: qsTr("Albums"), component: albumPageComponent },
-                        { name: qsTr("Artists"), component: artistPageComponent },
-                        { name: qsTr("Playlists"), component: playlistsPageComponent },
-                        { name: qsTr("Search"), component: searchPageComponent },
-                        { name: qsTr("Settings"), component: settingsPageComponent }
+                        { name: qsTr("Library"), component: libraryPageComponent, overlay: false },
+                        { name: qsTr("Albums"), component: albumPageComponent, overlay: false },
+                        { name: qsTr("Artists"), component: artistPageComponent, overlay: false },
+                        { name: qsTr("Playlists"), component: playlistsPageComponent, overlay: false },
+                        { name: qsTr("Search"), component: searchPageComponent, overlay: false },
+                        { name: qsTr("Now Playing"), component: nowPlayingPageComponent, overlay: true },
+                        { name: qsTr("Settings"), component: settingsPageComponent, overlay: false }
                     ]
 
                     delegate: Button {
@@ -553,8 +554,12 @@ Window {
                         }
 
                         onClicked: {
-                            rootWindow.currentPageIndex = index
-                            stackView.replace(modelData.component)
+                            if (modelData.overlay) {
+                                stackView.push(modelData.component)
+                            } else {
+                                rootWindow.currentPageIndex = index
+                                stackView.replace(modelData.component)
+                            }
                         }
                     }
                 }

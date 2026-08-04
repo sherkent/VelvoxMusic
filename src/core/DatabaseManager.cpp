@@ -147,6 +147,18 @@ bool DatabaseManager::createSchema()
         )",
         R"(
             CREATE INDEX IF NOT EXISTS idx_recent_plays ON recent_plays(played_at DESC)
+        )",
+        R"(
+            CREATE TABLE IF NOT EXISTS track_cover_colors (
+                track_id INTEGER PRIMARY KEY,
+                color0 TEXT,
+                color1 TEXT,
+                color2 TEXT,
+                color3 TEXT,
+                color4 TEXT,
+                updated_at INTEGER,
+                FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
+            )
         )"
     };
 
@@ -558,6 +570,46 @@ QList<Track> DatabaseManager::getRecentPlays(int limit)
         }
     }
     return tracks;
+}
+
+QList<QColor> DatabaseManager::getCoverColors(int trackId)
+{
+    QList<QColor> colors;
+    QSqlQuery query(m_db);
+    query.prepare("SELECT color0, color1, color2, color3, color4 FROM track_cover_colors WHERE track_id = ?");
+    query.addBindValue(trackId);
+    if (query.exec() && query.next()) {
+        for (int i = 0; i < 5; ++i) {
+            const QString value = query.value(i).toString();
+            if (!value.isEmpty())
+                colors.append(QColor(value));
+        }
+    }
+    return colors;
+}
+
+bool DatabaseManager::setCoverColors(int trackId, const QList<QColor> &colors)
+{
+    QSqlQuery query(m_db);
+    query.prepare(R"(
+        INSERT OR REPLACE INTO track_cover_colors
+            (track_id, color0, color1, color2, color3, color4, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    )");
+    query.addBindValue(trackId);
+    for (int i = 0; i < 5; ++i) {
+        if (i < colors.size() && colors.at(i).isValid())
+            query.addBindValue(colors.at(i).name());
+        else
+            query.addBindValue(QString());
+    }
+    query.addBindValue(QDateTime::currentDateTimeUtc().toMSecsSinceEpoch());
+
+    if (!query.exec()) {
+        qWarning() << "setCoverColors error:" << query.lastError().text();
+        return false;
+    }
+    return true;
 }
 
 QList<Album> DatabaseManager::getAllAlbums()

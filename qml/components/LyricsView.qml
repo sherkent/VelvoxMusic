@@ -14,7 +14,7 @@ import VelvoxMusic
 Rectangle {
     id: root
 
-    color: ThemeManager.surfaceColor
+    color: Qt.rgba(ThemeManager.surfaceColor.r, ThemeManager.surfaceColor.g, ThemeManager.surfaceColor.b, 0.88)
     radius: ThemeManager.radiusMedium
 
     ListView {
