@@ -181,395 +181,415 @@ Window {
         z: -1
     }
 
-    ColumnLayout {
-        id: mainLayout
-        anchors.fill: parent
-        spacing: 0
+    // ----------------------------------------------------------------------
+    // Title bar
+    // ----------------------------------------------------------------------
+    Rectangle {
+        id: titleBar
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: ThemeManager.titleBarHeight
+        color: ThemeManager.titleBarColor
+        z: 10
 
-        // ----------------------------------------------------------------------
-        // Title bar
-        // ----------------------------------------------------------------------
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: ThemeManager.titleBarHeight
-            color: ThemeManager.titleBarColor
-
-            MouseArea {
-                anchors.fill: parent
-                onPressed: rootWindow.startSystemMove()
-                onDoubleClicked: rootWindow.toggleMaximized()
-            }
-
-            RowLayout {
-                id: titleBarContent
-                anchors.fill: parent
-                anchors.margins: ThemeManager.spacingMedium
-                spacing: ThemeManager.spacingMedium
-
-                Text {
-                    text: qsTr("Velvox Music")
-                    color: ThemeManager.textColor
-                    font.pixelSize: ThemeManager.fontSizeLarge
-                    font.bold: true
-                }
-
-                Item { Layout.fillWidth: true }
-
-                Button {
-                    text: "_"
-                    flat: true
-                    contentItem: Text {
-                        text: parent.text
-                        color: ThemeManager.textColor
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                    background: Rectangle {
-                        color: parent.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
-                        radius: ThemeManager.radiusSmall
-                        Behavior on color { ColorAnimation { duration: Motion.durationFast } }
-                    }
-                    onClicked: rootWindow.showMinimized()
-                }
-
-                Button {
-                    text: rootWindow.visibility === Window.Maximized ? "❐" : "□"
-                    flat: true
-                    contentItem: Text {
-                        text: parent.text
-                        color: ThemeManager.textColor
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                    background: Rectangle {
-                        color: parent.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
-                        radius: ThemeManager.radiusSmall
-                        Behavior on color { ColorAnimation { duration: Motion.durationFast } }
-                    }
-                    onClicked: rootWindow.toggleMaximized()
-                }
-
-                Button {
-                    text: "×"
-                    flat: true
-                    contentItem: Text {
-                        text: parent.text
-                        color: ThemeManager.textColor
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                    background: Rectangle {
-                        color: parent.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
-                        radius: ThemeManager.radiusSmall
-                        Behavior on color { ColorAnimation { duration: Motion.durationFast } }
-                    }
-                    onClicked: Qt.quit()
-                }
-            }
+        MouseArea {
+            anchors.fill: parent
+            onPressed: rootWindow.startSystemMove()
+            onDoubleClicked: rootWindow.toggleMaximized()
         }
 
-        // ----------------------------------------------------------------------
-        // Main area: navigation + content
-        // ----------------------------------------------------------------------
         RowLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: 0
+            id: titleBarContent
+            anchors.fill: parent
+            anchors.leftMargin: ThemeManager.spacingMedium
+            anchors.rightMargin: ThemeManager.spacingMedium
+            spacing: ThemeManager.spacingSmall
 
-            // Left navigation
-            AcrylicPanel {
-                id: sidePanel
-                Layout.preferredWidth: ThemeManager.navWidth
+            Text {
+                text: qsTr("Velvox Music")
+                color: ThemeManager.textColor
+                font.pixelSize: ThemeManager.fontSizeLarge
+                font.bold: true
+                verticalAlignment: Text.AlignVCenter
                 Layout.fillHeight: true
-                source: meshBackground
-                blurRadius: 64
-                tintOpacity: 0.68
-                renderQuality: rootWindow.backgroundQuality
+            }
+
+            Item { Layout.fillWidth: true }
+
+            Button {
+                text: "_"
+                flat: true
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 28
+                contentItem: Text {
+                    anchors.fill: parent
+                    text: parent.text
+                    color: ThemeManager.textColor
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    anchors.fill: parent
+                    color: parent.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
+                    radius: ThemeManager.radiusSmall
+                    Behavior on color { ColorAnimation { duration: Motion.durationFast } }
+                }
+                onClicked: rootWindow.showMinimized()
+            }
+
+            Button {
+                text: rootWindow.visibility === Window.Maximized ? "❐" : "□"
+                flat: true
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 28
+                contentItem: Text {
+                    anchors.fill: parent
+                    text: parent.text
+                    color: ThemeManager.textColor
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    anchors.fill: parent
+                    color: parent.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
+                    radius: ThemeManager.radiusSmall
+                    Behavior on color { ColorAnimation { duration: Motion.durationFast } }
+                }
+                onClicked: rootWindow.toggleMaximized()
+            }
+
+            Button {
+                text: "×"
+                flat: true
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 28
+                contentItem: Text {
+                    anchors.fill: parent
+                    text: parent.text
+                    color: ThemeManager.textColor
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    anchors.fill: parent
+                    color: parent.hovered ? Qt.rgba(1, 0, 0, 0.2) : "transparent"
+                    radius: ThemeManager.radiusSmall
+                    Behavior on color { ColorAnimation { duration: Motion.durationFast } }
+                }
+                onClicked: Qt.quit()
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // Bottom player bar
+    // ----------------------------------------------------------------------
+    AcrylicPanel {
+        id: playerBar
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: ThemeManager.playerBarHeight
+        source: meshBackground
+        blurRadius: 48
+        tintOpacity: 0.70
+        renderQuality: rootWindow.backgroundQuality
+        z: 10
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: ThemeManager.spacingMedium
+            spacing: ThemeManager.spacingMedium
+
+            // Cover + info
+            RowLayout {
+                spacing: ThemeManager.spacingMedium
+                Layout.preferredWidth: 260
+
+                Rectangle {
+                    id: coverContainer
+                    Layout.preferredWidth: 56
+                    Layout.preferredHeight: 56
+                    color: ThemeManager.panelColor
+                    radius: ThemeManager.radiusSmall
+                    clip: true
+
+                    CrossFadeImage {
+                        anchors.fill: parent
+                        source: rootWindow.currentTrack.coverPath
+                                  ? "file:///" + rootWindow.currentTrack.coverPath
+                                  : ""
+                        fillMode: Image.PreserveAspectCrop
+                        sourceSize: Qt.size(56, 56)
+                        visible: source.length > 0
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "♪"
+                        color: ThemeManager.secondaryTextColor
+                        font.pixelSize: 24
+                        visible: rootWindow.currentTrack.coverPath.length === 0
+                    }
+                }
 
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: ThemeManager.spacingMedium
-                    spacing: ThemeManager.spacingSmall
-
-                    Repeater {
-                        model: [
-                            { name: qsTr("Library"), component: libraryPageComponent },
-                            { name: qsTr("Albums"), component: albumPageComponent },
-                            { name: qsTr("Artists"), component: artistPageComponent },
-                            { name: qsTr("Playlists"), component: playlistsPageComponent },
-                            { name: qsTr("Search"), component: searchPageComponent },
-                            { name: qsTr("Settings"), component: settingsPageComponent }
-                        ]
-
-                        delegate: Button {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 36
-                            text: modelData.name
-                            flat: true
-
-                            contentItem: Text {
-                                text: parent.text
-                                color: ThemeManager.textColor
-                                font.pixelSize: ThemeManager.fontSizeMedium
-                                horizontalAlignment: Text.AlignLeft
-                                verticalAlignment: Text.AlignVCenter
-                            }
-
-                            background: Rectangle {
-                                color: rootWindow.currentPageIndex === index
-                                        ? ThemeManager.hoverColor
-                                        : (parent.down
-                                            ? Qt.darker(ThemeManager.panelColor, 1.2)
-                                            : (parent.hovered ? ThemeManager.panelColor : "transparent"))
-                                radius: ThemeManager.radiusSmall
-
-                                Behavior on color { ColorAnimation { duration: Motion.durationFast } }
-                                Behavior on opacity { NumberAnimation { duration: Motion.durationFast; easing: Motion.easeOutCubic } }
-                                opacity: parent.down ? 0.85 : 1.0
-                            }
-
-                            onClicked: {
-                                rootWindow.currentPageIndex = index
-                                stackView.replace(modelData.component)
-                            }
-                        }
-                    }
-
-                    Item { Layout.fillHeight: true }
-                }
-            }
-
-            // Content stack
-            StackView {
-                id: stackView
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                initialItem: libraryPageComponent
-
-                pushEnter: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.durationNormal; easing: Motion.easeOutCubic }
-                        NumberAnimation { property: "x"; from: 32; to: 0; duration: Motion.durationNormal; easing: Motion.easeOutCubic }
-                    }
-                }
-                pushExit: Transition {
-                    NumberAnimation { property: "opacity"; from: 1; to: 0; duration: Motion.durationFast; easing: Motion.easeOutCubic }
-                }
-                popEnter: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.durationNormal; easing: Motion.easeOutCubic }
-                        NumberAnimation { property: "x"; from: -32; to: 0; duration: Motion.durationNormal; easing: Motion.easeOutCubic }
-                    }
-                }
-                popExit: Transition {
-                    NumberAnimation { property: "opacity"; from: 1; to: 0; duration: Motion.durationFast; easing: Motion.easeOutCubic }
-                }
-                replaceEnter: pushEnter
-                replaceExit: pushExit
-            }
-        }
-
-        // ----------------------------------------------------------------------
-        // Bottom player bar
-        // ----------------------------------------------------------------------
-        AcrylicPanel {
-            id: playerBar
-            Layout.fillWidth: true
-            Layout.preferredHeight: ThemeManager.playerBarHeight
-            source: meshBackground
-            blurRadius: 48
-            tintOpacity: 0.70
-            renderQuality: rootWindow.backgroundQuality
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: ThemeManager.spacingMedium
-                spacing: ThemeManager.spacingMedium
-
-                // Cover + info
-                RowLayout {
-                    spacing: ThemeManager.spacingMedium
-                    Layout.preferredWidth: 260
-
-                    Rectangle {
-                        id: coverContainer
-                        Layout.preferredWidth: 56
-                        Layout.preferredHeight: 56
-                        color: ThemeManager.panelColor
-                        radius: ThemeManager.radiusSmall
-                        clip: true
-
-                        CrossFadeImage {
-                            anchors.fill: parent
-                            source: rootWindow.currentTrack.coverPath
-                                      ? "file:///" + rootWindow.currentTrack.coverPath
-                                      : ""
-                            fillMode: Image.PreserveAspectCrop
-                            sourceSize: Qt.size(56, 56)
-                            visible: source.length > 0
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "♪"
-                            color: ThemeManager.secondaryTextColor
-                            font.pixelSize: 24
-                            visible: rootWindow.currentTrack.coverPath.length === 0
-                        }
-                    }
-
-                    ColumnLayout {
-                        spacing: 2
-                        Layout.fillWidth: true
-
-                        Text {
-                            text: rootWindow.currentTrack.title || qsTr("No track selected")
-                            color: ThemeManager.textColor
-                            font.pixelSize: ThemeManager.fontSizeLarge
-                            font.bold: true
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
-                        }
-
-                        Text {
-                            text: rootWindow.currentTrack.artist || ""
-                            color: ThemeManager.secondaryTextColor
-                            font.pixelSize: ThemeManager.fontSizeMedium
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
-                        }
-                    }
-                }
-
-                // Playback controls
-                RowLayout {
-                    spacing: ThemeManager.spacingMedium
-                    Layout.alignment: Qt.AlignHCenter
-
-                    Button {
-                        text: "⏮"
-                        flat: true
-                        enabled: rootWindow.currentTrackSourceRow >= 0
-                        onClicked: rootWindow.playPrevious()
-                        contentItem: Text {
-                            text: parent.text
-                            color: ThemeManager.secondaryTextColor
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        background: Rectangle {
-                            color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
-                            radius: ThemeManager.radiusSmall
-                            Behavior on color { ColorAnimation { duration: Motion.durationFast } }
-                        }
-                    }
-
-                    PlayPauseButton {
-                        playing: audioEngine.playbackState === AudioEngine.Playing
-                        onClicked: rootWindow.togglePlayPause()
-                    }
-
-                    Button {
-                        text: "⏭"
-                        flat: true
-                        enabled: rootWindow.currentTrackSourceRow >= 0
-                        onClicked: rootWindow.playNext()
-                        contentItem: Text {
-                            text: parent.text
-                            color: ThemeManager.secondaryTextColor
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        background: Rectangle {
-                            color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
-                            radius: ThemeManager.radiusSmall
-                            Behavior on color { ColorAnimation { duration: Motion.durationFast } }
-                        }
-                    }
-
-                    Button {
-                        text: "Lyrics"
-                        flat: true
-                        contentItem: Text {
-                            text: parent.text
-                            color: ThemeManager.textColor
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        background: Rectangle {
-                            color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
-                            radius: ThemeManager.radiusSmall
-                            Behavior on color { ColorAnimation { duration: Motion.durationFast } }
-                        }
-                        onClicked: rootWindow.lyricsVisible = !rootWindow.lyricsVisible
-                    }
-
-                    Button {
-                        text: "Mini"
-                        flat: true
-                        contentItem: Text {
-                            text: parent.text
-                            color: ThemeManager.textColor
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        background: Rectangle {
-                            color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
-                            radius: ThemeManager.radiusSmall
-                            Behavior on color { ColorAnimation { duration: Motion.durationFast } }
-                        }
-                        onClicked: rootWindow.miniPlayerMode = !rootWindow.miniPlayerMode
-                    }
-                }
-
-                // Progress
-                RowLayout {
-                    spacing: ThemeManager.spacingSmall
+                    spacing: 2
                     Layout.fillWidth: true
 
                     Text {
-                        text: rootWindow.formatTime(audioEngine.position)
-                        color: ThemeManager.secondaryTextColor
-                        Layout.preferredWidth: 45
-                    }
-
-                    Slider {
+                        text: rootWindow.currentTrack.title || qsTr("No track selected")
+                        color: ThemeManager.textColor
+                        font.pixelSize: ThemeManager.fontSizeLarge
+                        font.bold: true
+                        elide: Text.ElideRight
                         Layout.fillWidth: true
-                        from: 0
-                        to: Math.max(audioEngine.duration, 1)
-                        value: audioEngine.position
-                        onPressedChanged: {
-                            if (!pressed)
-                                audioEngine.seek(value)
-                        }
                     }
 
                     Text {
-                        text: rootWindow.formatTime(audioEngine.duration)
+                        text: rootWindow.currentTrack.artist || ""
                         color: ThemeManager.secondaryTextColor
-                        Layout.preferredWidth: 45
-                    }
-                }
-
-                // Volume
-                RowLayout {
-                    spacing: ThemeManager.spacingSmall
-                    Layout.preferredWidth: 140
-
-                    Text {
-                        text: "Vol"
-                        color: ThemeManager.secondaryTextColor
-                    }
-
-                    Slider {
+                        font.pixelSize: ThemeManager.fontSizeMedium
+                        elide: Text.ElideRight
                         Layout.fillWidth: true
-                        from: 0
-                        to: 1
-                        value: audioEngine.volume
-                        onMoved: audioEngine.volume = value
                     }
                 }
             }
+
+            // Playback controls
+            RowLayout {
+                spacing: ThemeManager.spacingMedium
+                Layout.alignment: Qt.AlignHCenter
+
+                Button {
+                    text: "⏮"
+                    flat: true
+                    enabled: rootWindow.currentTrackSourceRow >= 0
+                    onClicked: rootWindow.playPrevious()
+                    contentItem: Text {
+                        text: parent.text
+                        color: ThemeManager.secondaryTextColor
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                        radius: ThemeManager.radiusSmall
+                        Behavior on color { ColorAnimation { duration: Motion.durationFast } }
+                    }
+                }
+
+                PlayPauseButton {
+                    playing: audioEngine.playbackState === AudioEngine.Playing
+                    onClicked: rootWindow.togglePlayPause()
+                }
+
+                Button {
+                    text: "⏭"
+                    flat: true
+                    enabled: rootWindow.currentTrackSourceRow >= 0
+                    onClicked: rootWindow.playNext()
+                    contentItem: Text {
+                        text: parent.text
+                        color: ThemeManager.secondaryTextColor
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                        radius: ThemeManager.radiusSmall
+                        Behavior on color { ColorAnimation { duration: Motion.durationFast } }
+                    }
+                }
+
+                Button {
+                    text: "Lyrics"
+                    flat: true
+                    contentItem: Text {
+                        text: parent.text
+                        color: ThemeManager.textColor
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                        radius: ThemeManager.radiusSmall
+                        Behavior on color { ColorAnimation { duration: Motion.durationFast } }
+                    }
+                    onClicked: rootWindow.lyricsVisible = !rootWindow.lyricsVisible
+                }
+
+                Button {
+                    text: "Mini"
+                    flat: true
+                    contentItem: Text {
+                        text: parent.text
+                        color: ThemeManager.textColor
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                        radius: ThemeManager.radiusSmall
+                        Behavior on color { ColorAnimation { duration: Motion.durationFast } }
+                    }
+                    onClicked: rootWindow.miniPlayerMode = !rootWindow.miniPlayerMode
+                }
+            }
+
+            // Progress
+            RowLayout {
+                spacing: ThemeManager.spacingSmall
+                Layout.fillWidth: true
+
+                Text {
+                    text: rootWindow.formatTime(audioEngine.position)
+                    color: ThemeManager.secondaryTextColor
+                    Layout.preferredWidth: 45
+                }
+
+                Slider {
+                    Layout.fillWidth: true
+                    from: 0
+                    to: Math.max(audioEngine.duration, 1)
+                    value: audioEngine.position
+                    onPressedChanged: {
+                        if (!pressed)
+                            audioEngine.seek(value)
+                    }
+                }
+
+                Text {
+                    text: rootWindow.formatTime(audioEngine.duration)
+                    color: ThemeManager.secondaryTextColor
+                    Layout.preferredWidth: 45
+                }
+            }
+
+            // Volume
+            RowLayout {
+                spacing: ThemeManager.spacingSmall
+                Layout.preferredWidth: 140
+
+                Text {
+                    text: "Vol"
+                    color: ThemeManager.secondaryTextColor
+                }
+
+                Slider {
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 1
+                    value: audioEngine.volume
+                    onMoved: audioEngine.volume = value
+                }
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // Main area: navigation + content
+    // ----------------------------------------------------------------------
+    RowLayout {
+        id: mainArea
+        anchors.top: titleBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: playerBar.top
+        spacing: 0
+        z: 0
+
+        // Left navigation
+        AcrylicPanel {
+            id: sidePanel
+            Layout.preferredWidth: ThemeManager.navWidth
+            Layout.fillHeight: true
+            source: meshBackground
+            blurRadius: 64
+            tintOpacity: 0.68
+            renderQuality: rootWindow.backgroundQuality
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: ThemeManager.spacingMedium
+                spacing: ThemeManager.spacingSmall
+
+                Repeater {
+                    model: [
+                        { name: qsTr("Library"), component: libraryPageComponent },
+                        { name: qsTr("Albums"), component: albumPageComponent },
+                        { name: qsTr("Artists"), component: artistPageComponent },
+                        { name: qsTr("Playlists"), component: playlistsPageComponent },
+                        { name: qsTr("Search"), component: searchPageComponent },
+                        { name: qsTr("Settings"), component: settingsPageComponent }
+                    ]
+
+                    delegate: Button {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 36
+                        text: modelData.name
+                        flat: true
+
+                        contentItem: Text {
+                            text: parent.text
+                            color: ThemeManager.textColor
+                            font.pixelSize: ThemeManager.fontSizeMedium
+                            horizontalAlignment: Text.AlignLeft
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        background: Rectangle {
+                            color: rootWindow.currentPageIndex === index
+                                    ? ThemeManager.hoverColor
+                                    : (parent.down
+                                        ? Qt.darker(ThemeManager.panelColor, 1.2)
+                                        : (parent.hovered ? ThemeManager.panelColor : "transparent"))
+                            radius: ThemeManager.radiusSmall
+
+                            Behavior on color { ColorAnimation { duration: Motion.durationFast } }
+                            Behavior on opacity { NumberAnimation { duration: Motion.durationFast; easing: Motion.easeOutCubic } }
+                            opacity: parent.down ? 0.85 : 1.0
+                        }
+
+                        onClicked: {
+                            rootWindow.currentPageIndex = index
+                            stackView.replace(modelData.component)
+                        }
+                    }
+                }
+
+                Item { Layout.fillHeight: true }
+            }
+        }
+
+        // Content stack
+        StackView {
+            id: stackView
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            initialItem: libraryPageComponent
+
+            pushEnter: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.durationNormal; easing: Motion.easeOutCubic }
+                    NumberAnimation { property: "x"; from: 32; to: 0; duration: Motion.durationNormal; easing: Motion.easeOutCubic }
+                }
+            }
+            pushExit: Transition {
+                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: Motion.durationFast; easing: Motion.easeOutCubic }
+            }
+            popEnter: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.durationNormal; easing: Motion.easeOutCubic }
+                    NumberAnimation { property: "x"; from: -32; to: 0; duration: Motion.durationNormal; easing: Motion.easeOutCubic }
+                }
+            }
+            popExit: Transition {
+                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: Motion.durationFast; easing: Motion.easeOutCubic }
+            }
+            replaceEnter: pushEnter
+            replaceExit: pushExit
         }
     }
 
